@@ -1,9 +1,8 @@
 import collections
+
 import torch
 import torch.nn as nn
 from numpy import mean
-
-
 
 
 class strLabelConverter(object):
@@ -44,7 +43,7 @@ class strLabelConverter(object):
             length = [len(s) for s in text]
             text = ''.join(text)
             text, _ = self.encode(text)
-        return (torch.IntTensor(text), torch.IntTensor(length))
+        return torch.IntTensor(text), torch.IntTensor(length)
 
     def decode(self, t, length, raw=False):
         """Decode encoded texts back into strs.
@@ -58,7 +57,8 @@ class strLabelConverter(object):
         """
         if length.numel() == 1:
             length = length[0]
-            assert t.numel() == length, "text with length: {} does not match declared length: {}".format(t.numel(), length)
+            assert t.numel() == length, "text with length: {} does not match declared length: {}".format(t.numel(),
+                                                                                                         length)
             if raw:
                 return ''.join([self.alphabet[i - 1] for i in t])
             else:
@@ -69,7 +69,8 @@ class strLabelConverter(object):
                 return ''.join(char_list)
         else:
             # batch mode
-            assert t.numel() == length.sum(), "texts with length: {} does not match declared length: {}".format(t.numel(), length.sum())
+            assert t.numel() == length.sum(), "texts with length: {} does not match declared length: {}".format(
+                t.numel(), length.sum())
             texts = []
             index = 0
             for i in range(length.numel()):
@@ -81,21 +82,21 @@ class strLabelConverter(object):
         return texts
 
 
-def decode_prediction(logits: torch.Tensor, 
+def decode_prediction(logits: torch.Tensor,
                       label_converter: strLabelConverter) -> str:
     tokens = logits.softmax(2).argmax(2)
     tokens = tokens.squeeze(1).numpy()
-    
+
     # convert tor stings tokens
-    tokens = ''.join([label_converter.idx2char[token] 
-                      if token != 0  else '-' 
+    tokens = ''.join([label_converter.idx2char[token]
+                      if token != 0 else '-'
                       for token in tokens])
     tokens = tokens.split('-')
-    
+
     # remove duplicates
-    text = [char 
-            for batch_token in tokens 
+    text = [char
+            for batch_token in tokens
             for idx, char in enumerate(batch_token)
-            if char != batch_token[idx-1] or len(batch_token) == 1]
+            if char != batch_token[idx - 1] or len(batch_token) == 1]
     text = ''.join(text)
     return text

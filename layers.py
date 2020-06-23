@@ -3,8 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
-
 class blockCNN(nn.Module):
     def __init__(self, in_nc, out_nc, kernel_size, padding, stride=1):
         super(blockCNN, self).__init__()
@@ -13,13 +11,13 @@ class blockCNN(nn.Module):
         self.kernel_size = kernel_size
         self.padding = padding
         # layers
-        self.conv = nn.Conv2d(in_nc, out_nc, 
-                              kernel_size=kernel_size, 
-                              stride=stride, 
+        self.conv = nn.Conv2d(in_nc, out_nc,
+                              kernel_size=kernel_size,
+                              stride=stride,
                               padding=padding)
         self.bn = nn.BatchNorm2d(out_nc)
-        
-    def forward(self, batch, use_bn=False, use_relu=False, 
+
+    def forward(self, batch, use_bn=False, use_relu=False,
                 use_maxpool=False, maxpool_kernelsize=None):
         """
             in:
@@ -37,6 +35,7 @@ class blockCNN(nn.Module):
             batch = F.max_pool2d(batch, kernel_size=maxpool_kernelsize, stride=2)
         return batch
 
+
 class blockRNN(nn.Module):
     def __init__(self, in_size, hidden_size, out_size, bidirectional, dropout=0):
         super(blockRNN, self).__init__()
@@ -46,7 +45,7 @@ class blockRNN(nn.Module):
         self.bidirectional = bidirectional
         # layers
         self.gru = nn.GRU(in_size, hidden_size, bidirectional=bidirectional)
-        
+
     def forward(self, batch, add_output=False):
         """
         in array:
@@ -54,7 +53,7 @@ class blockRNN(nn.Module):
         out array:
             out - [seq_len , batch_size, out_size]
         """
-        batch_size = batch.size(1)
+        # batch_size = batch.size(1)
         outputs, hidden = self.gru(batch)
         out_size = int(outputs.size(2) / 2)
         if add_output:
